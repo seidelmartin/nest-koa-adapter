@@ -1,0 +1,7 @@
+test
+src
+.eslint*
+.idea
+.mocharc.json
+.prettierrc
+tsconfig.*

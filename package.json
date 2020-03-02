@@ -9,7 +9,7 @@
     "lint": "eslint '**/*.{js,ts}' --format stylish --fix",
     "format": "prettier \"**/*.ts\" --ignore-path .prettierignore --write",
     "prepublishOnly": "rm -rf dist && npm run build:publish",
-    "np:publish": "np --contents dist"
+    "np:publish": "np --no-yarn"
   },
   "repository": {
     "type": "git",
