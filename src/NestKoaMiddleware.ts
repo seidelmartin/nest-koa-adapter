@@ -11,7 +11,7 @@ export interface NestKoaMiddleware {
 }
 
 export const koaToNestMiddleware = (
-  middleware: Koa.Middleware,
+  middleware: Koa.Middleware<any, any>,
 ): NestKoaFunctionalMiddleware => (
   req: Koa.Request,
   res: Koa.Response,
