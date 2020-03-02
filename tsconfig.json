@@ -9,8 +9,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts"],
