@@ -1,11 +1,16 @@
 import { AbstractHttpAdapter } from '@nestjs/core';
-import { NestApplicationOptions, RequestMethod } from '@nestjs/common';
+import {
+  NestApplicationOptions,
+  NestMiddleware,
+  RequestMethod,
+} from '@nestjs/common';
 import Koa from 'koa';
 import KoaRouter from 'koa-router';
 import koaBodyBarser from 'koa-bodyparser';
 import * as http from 'http';
 import * as https from 'https';
 import { RequestHandler } from '@nestjs/common/interfaces';
+import { nestToKoaMiddleware } from './NestKoaMiddleware';
 
 type HttpMethods =
   | 'all'
@@ -193,8 +198,11 @@ export class KoaAdapter extends AbstractHttpAdapter<
     this.getInstance<Koa>().on('error', handler);
   }
 
-  public setNotFoundHandler(handler: Function, prefix?: string): any {
-    // TODO
+  public setNotFoundHandler(
+    handler: NestMiddleware['use'],
+    prefix?: string,
+  ): any {
+    this.getInstance<Koa>().use(nestToKoaMiddleware(handler));
   }
 
   public setHeader(response: any, name: string, value: string): any {

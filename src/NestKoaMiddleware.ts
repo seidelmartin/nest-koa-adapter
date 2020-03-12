@@ -1,4 +1,5 @@
 import * as Koa from 'koa';
+import { NestMiddleware } from '@nestjs/common';
 
 export type NestKoaFunctionalMiddleware = (
   req: Koa.Request,
@@ -17,3 +18,8 @@ export const koaToNestMiddleware = (
   res: Koa.Response,
   next: Koa.Next,
 ) => middleware(req.ctx, next);
+
+export const nestToKoaMiddleware = (
+  middleware: NestMiddleware['use'],
+): Koa.Middleware<any, any> => (ctx: Koa.Context, next: Koa.Next) =>
+  middleware(ctx.request, ctx.response, next);

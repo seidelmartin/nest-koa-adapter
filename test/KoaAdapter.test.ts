@@ -1,8 +1,8 @@
 import 'reflect-metadata';
-import { KoaAdapter } from '../src/KoaAdapter';
+import { KoaAdapter } from '../src';
 import { Test } from '@nestjs/testing';
 import supertest from 'supertest';
-import { NestKoaApplication } from '../src/NestKoaApplication';
+import { NestKoaApplication } from '../src';
 import { HelloWorldController } from './utils/HelloWorldController';
 import { HostFilterController } from './utils/HostFilterController';
 import { DummyController } from './utils/DummyController';
@@ -61,7 +61,12 @@ describe(KoaAdapter.name, () => {
     it('/GET host - returns 404 if not set', async () => {
       return supertest(app.getHttpServer())
         .get('/host')
-        .expect(404);
+        .expect(404)
+        .expect({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Cannot GET /host',
+        });
     });
 
     it('/GET host - returns data if host set', async () => {
@@ -93,9 +98,7 @@ describe(KoaAdapter.name, () => {
           test: 'value',
         })
         .expect(200)
-        .expect({
-          test: 'value',
-        });
+        .expect({ test: 'value' });
     });
 
     it('properly parses body params', async () => {
@@ -115,6 +118,19 @@ describe(KoaAdapter.name, () => {
         .put('/dummy/param')
         .expect(200)
         .expect('param');
+    });
+  });
+
+  describe('Not found handler', () => {
+    it('should return 404 status for undefined path', async () => {
+      return supertest(app.getHttpServer())
+        .get('/not-found')
+        .expect(404)
+        .expect({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Cannot GET /not-found',
+        });
     });
   });
 });
