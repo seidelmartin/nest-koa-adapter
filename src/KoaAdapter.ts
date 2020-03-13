@@ -11,6 +11,9 @@ import * as http from 'http';
 import * as https from 'https';
 import { RequestHandler } from '@nestjs/common/interfaces';
 import { nestToKoaMiddleware } from './NestKoaMiddleware';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
+import { KoaCorsOptions } from './KoaCorsOptions';
 
 type HttpMethods =
   | 'all'
@@ -29,13 +32,19 @@ export class KoaAdapter extends AbstractHttpAdapter<
   Koa.Request,
   Koa.Response
 > {
-  private readonly router: KoaRouter;
+  private router?: KoaRouter;
 
   constructor(instance: Koa = new Koa()) {
     super(instance);
+  }
 
-    this.router = new KoaRouter();
-    instance.use(this.router.routes());
+  private getRouter(): KoaRouter {
+    if (!this.router) {
+      this.router = new KoaRouter();
+      this.getInstance<Koa>().use(this.router.routes());
+    }
+
+    return this.router;
   }
 
   public delete(pathOrHandler: string | KoaHandler, handler?: KoaHandler): any {
@@ -44,8 +53,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.delete(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().delete(
+      routePath,
+      (ctx: Koa.Context, next: Koa.Next) =>
+        routeHandler(ctx.request, ctx.response, next),
     );
   }
 
@@ -55,7 +66,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.get(routePath, (ctx: Koa.Context, next: Koa.Next) =>
+    return this.getRouter().get(routePath, (ctx: Koa.Context, next: Koa.Next) =>
       routeHandler(ctx.request, ctx.response, next),
     );
   }
@@ -66,8 +77,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.head(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().head(
+      routePath,
+      (ctx: Koa.Context, next: Koa.Next) =>
+        routeHandler(ctx.request, ctx.response, next),
     );
   }
 
@@ -80,8 +93,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.options(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().options(
+      routePath,
+      (ctx: Koa.Context, next: Koa.Next) =>
+        routeHandler(ctx.request, ctx.response, next),
     );
   }
 
@@ -91,8 +106,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.patch(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().patch(
+      routePath,
+      (ctx: Koa.Context, next: Koa.Next) =>
+        routeHandler(ctx.request, ctx.response, next),
     );
   }
 
@@ -102,8 +119,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.post(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().post(
+      routePath,
+      (ctx: Koa.Context, next: Koa.Next) =>
+        routeHandler(ctx.request, ctx.response, next),
     );
   }
 
@@ -113,7 +132,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.router.put(routePath, (ctx: Koa.Context, next: Koa.Next) =>
+    return this.getRouter().put(routePath, (ctx: Koa.Context, next: Koa.Next) =>
       routeHandler(ctx.request, ctx.response, next),
     );
   }
@@ -210,33 +229,44 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public registerParserMiddleware(prefix?: string): any {
-    this.router.use(
-      koaBodyBarser(),
+    this.getRouter().use(koaBodyBarser(), async (ctx, next) => {
       // This is because nest expects params in request object so we need to extend it
-      async (ctx, next) => {
-        Object.assign(ctx.request, { params: ctx.params });
-        await next();
-      },
-    );
+      Object.assign(ctx.request, { params: ctx.params });
+      await next();
+    });
   }
 
-  public enableCors(options: any): any {
-    // TODO
+  public enableCors(options?: CorsOptions): any {
+    const corsMiddleware = loadPackage('@koa/cors', 'KoaAdapter.enableCors()');
+
+    KoaCorsOptions.validateNestOptions(options);
+
+    const koaCorsOptions = options && new KoaCorsOptions(options);
+
+    if (koaCorsOptions) {
+      koaCorsOptions.handleOptionsSuccessStatus(
+        this.getInstance<Koa>(),
+        options,
+      );
+    }
+    this.getInstance<Koa>().use(corsMiddleware(koaCorsOptions));
   }
 
   public createMiddlewareFactory(
     requestMethod: RequestMethod,
   ): (path: string, callback: Function) => any {
     return (path: string, callback: Function) => {
+      const router = this.getRouter();
+
       const routeMethodsMap: Record<RequestMethod, KoaRouteMethods> = {
-        [RequestMethod.ALL]: this.router.all,
-        [RequestMethod.DELETE]: this.router.delete,
-        [RequestMethod.GET]: this.router.get,
-        [RequestMethod.HEAD]: this.router.head,
-        [RequestMethod.OPTIONS]: this.router.options,
-        [RequestMethod.PATCH]: this.router.patch,
-        [RequestMethod.POST]: this.router.post,
-        [RequestMethod.PUT]: this.router.put,
+        [RequestMethod.ALL]: router.all,
+        [RequestMethod.DELETE]: router.delete,
+        [RequestMethod.GET]: router.get,
+        [RequestMethod.HEAD]: router.head,
+        [RequestMethod.OPTIONS]: router.options,
+        [RequestMethod.PATCH]: router.patch,
+        [RequestMethod.POST]: router.post,
+        [RequestMethod.PUT]: router.put,
       };
 
       const routeMethod = (
