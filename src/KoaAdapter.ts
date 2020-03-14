@@ -14,6 +14,7 @@ import { nestToKoaMiddleware } from './NestKoaMiddleware';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { KoaCorsOptions } from './KoaCorsOptions';
+import { Options as ServeStaticOptions } from 'koa-static';
 
 type HttpMethods =
   | 'all'
@@ -170,8 +171,13 @@ export class KoaAdapter extends AbstractHttpAdapter<
     this.httpServer = http.createServer(this.getInstance<Koa>().callback());
   }
 
-  public useStaticAssets(...args: any[]): any {
-    // TODO https://www.npmjs.com/package/koa-static
+  public useStaticAssets(path: string, options?: ServeStaticOptions): any {
+    const serveStaticMiddleware = loadPackage(
+      'koa-static',
+      'KoaAdapter.useStaticAssets()',
+    );
+
+    this.getInstance<Koa>().use(serveStaticMiddleware(path, options));
   }
 
   public setViewEngine(engine: string): any {

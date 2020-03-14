@@ -9,11 +9,8 @@ It consists of `KoaAdapter` which is basically just mapping between Nest server 
 
 ### Missing parts
 
- - Static assets are not yet implemented
  - Setting view engine is not implemented
  - Rendering of static pages is not yet implemented
- - CORS settings are not yet implemented
- - Not found handler is not yet implemented
 
 ## How to use
 
@@ -68,3 +65,45 @@ class TestModule {
   }
 }
 ```
+
+#### CORS
+
+To use CORS you'll have to install [`@koa/cors`](https://github.com/koajs/cors) package.
+
+```
+npm install @koa/cors
+```
+
+After installation is done you can set CORS same way as in normal NEST application.
+
+>  The `enableCors` method accepts options same as normal Nest application. The only difference is in `origin` property which should not be function.
+
+```typescript
+const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
+
+app.enableCors();
+
+await app.init();
+```
+
+#### Static assets
+
+To use static assets you have to install [`koa-static`](https://github.com/koajs/static) package.
+
+```
+npm install koa-static
+```
+
+Once you have the dependency installed you can set you static assets folder.
+
+```typescript
+const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
+
+app.useStaticAssets(path.join(__dirname, 'static'));
+
+app.useStaticAssets(path.join(__dirname, 'static'), options);
+
+await app.init();
+```
+
+>  The `useStaticAssets` method also accepts [options](https://github.com/koajs/static#options) which are exactly same as those from `koa-static`.
