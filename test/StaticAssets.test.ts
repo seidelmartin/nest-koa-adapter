@@ -9,7 +9,7 @@ import assert from 'assert';
 
 const readFile = promisify(fs.readFile);
 
-describe.only('Static assets', () => {
+describe('Static assets', () => {
   let app: NestKoaApplication;
   let file: Buffer;
 

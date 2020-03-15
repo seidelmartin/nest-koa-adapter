@@ -7,11 +7,6 @@ It consists of `KoaAdapter` which is basically just mapping between Nest server 
 `NestKoaMiddleware` and `NestKoaFunctionalMiddleware` are interfaces for writing middleware for Nest together with Koa.
 `koaToNestMiddleware` is an utility function which can convert your old Koa middleware so it can be used in Nest.
 
-### Missing parts
-
- - Setting view engine is not implemented
- - Rendering of static pages is not yet implemented
-
 ## How to use
 
 #### Create application
@@ -101,9 +96,34 @@ const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
 
 app.useStaticAssets(path.join(__dirname, 'static'));
 
+// Or with options
 app.useStaticAssets(path.join(__dirname, 'static'), options);
 
 await app.init();
 ```
 
 >  The `useStaticAssets` method also accepts [options](https://github.com/koajs/static#options) which are exactly same as those from `koa-static`.
+
+#### Views engine
+
+To use MVC pattern you'll have to install [`koa-views`](https://www.npmjs.com/package/koa-views) package. This package allows you to use your favourite templating system.
+
+```
+npm install koa-views
+```
+
+To setup the view engine you have to specify your views folder and other options from [`koa-views`](https://github.com/queckezz/koa-views#api) or [`consolidate`](https://github.com/tj/consolidate.js) which is used under the hood.
+
+```typescript
+const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
+
+app.setViewEngine({
+  viewsDir: path.join(__dirname, 'views'),
+    map: {
+      html: 'lodash',
+    },
+});
+
+await app.init();
+```
+ 

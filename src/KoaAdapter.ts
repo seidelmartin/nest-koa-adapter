@@ -15,6 +15,8 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { KoaCorsOptions } from './KoaCorsOptions';
 import { Options as ServeStaticOptions } from 'koa-static';
+import { KoaViewsOptions } from './KoaViews';
+import { Stream } from 'stream';
 
 type HttpMethods =
   | 'all'
@@ -56,8 +58,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
     return this.getRouter().delete(
       routePath,
-      (ctx: Koa.Context, next: Koa.Next) =>
-        routeHandler(ctx.request, ctx.response, next),
+      this.createRouteHandler(routeHandler),
     );
   }
 
@@ -67,8 +68,9 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.getRouter().get(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().get(
+      routePath,
+      this.createRouteHandler(routeHandler),
     );
   }
 
@@ -80,8 +82,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
     return this.getRouter().head(
       routePath,
-      (ctx: Koa.Context, next: Koa.Next) =>
-        routeHandler(ctx.request, ctx.response, next),
+      this.createRouteHandler(routeHandler),
     );
   }
 
@@ -96,8 +97,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
     return this.getRouter().options(
       routePath,
-      (ctx: Koa.Context, next: Koa.Next) =>
-        routeHandler(ctx.request, ctx.response, next),
+      this.createRouteHandler(routeHandler),
     );
   }
 
@@ -109,8 +109,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
     return this.getRouter().patch(
       routePath,
-      (ctx: Koa.Context, next: Koa.Next) =>
-        routeHandler(ctx.request, ctx.response, next),
+      this.createRouteHandler(routeHandler),
     );
   }
 
@@ -122,8 +121,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
     return this.getRouter().post(
       routePath,
-      (ctx: Koa.Context, next: Koa.Next) =>
-        routeHandler(ctx.request, ctx.response, next),
+      this.createRouteHandler(routeHandler),
     );
   }
 
@@ -133,9 +131,17 @@ export class KoaAdapter extends AbstractHttpAdapter<
       handler,
     );
 
-    return this.getRouter().put(routePath, (ctx: Koa.Context, next: Koa.Next) =>
-      routeHandler(ctx.request, ctx.response, next),
+    return this.getRouter().put(
+      routePath,
+      this.createRouteHandler(routeHandler),
     );
+  }
+
+  private createRouteHandler(routeHandler: KoaHandler) {
+    return (ctx: Koa.ParameterizedContext, next: Koa.Next) => {
+      ctx.respond = false;
+      routeHandler(ctx.request, ctx.response, next);
+    };
   }
 
   private getRouteAndHandler(
@@ -180,8 +186,17 @@ export class KoaAdapter extends AbstractHttpAdapter<
     this.getInstance<Koa>().use(serveStaticMiddleware(path, options));
   }
 
-  public setViewEngine(engine: string): any {
-    // TODO https://www.npmjs.com/package/koa-views
+  public setViewEngine(options: KoaViewsOptions | any): any {
+    const viewsMiddleware = loadPackage(
+      'koa-views',
+      'KoaAdapter.setViewEngine()',
+    );
+
+    const { viewsDir, ...viewsOptions } = options as KoaViewsOptions;
+
+    this.getInstance<Koa>().use(
+      viewsMiddleware(viewsDir, { autoRender: false, ...viewsOptions }),
+    );
   }
 
   public getRequestHostname(request: any) {
@@ -200,15 +215,58 @@ export class KoaAdapter extends AbstractHttpAdapter<
     response.status = statusCode;
   }
 
-  public reply(response: any, body: any, statusCode?: number) {
+  public reply(response: Koa.Response, body: any, statusCode?: number) {
+    response.ctx.respond = false;
     response.body = body;
     if (statusCode) {
       response.status = statusCode;
     }
+
+    const { writable, status, ctx, res: rawResponse } = response;
+    const { headersSent } = rawResponse;
+
+    if (!writable) {
+      return;
+    }
+
+    // Empty response
+    if ([null, undefined].includes(body)) {
+      body =
+        ctx.req.httpVersionMajor >= 2
+          ? String(status)
+          : ctx.message || String(status);
+
+      if (!headersSent) {
+        ctx.type = 'text';
+        ctx.length = Buffer.byteLength(body);
+      }
+      return rawResponse.end(body);
+    }
+
+    // Other responses
+    switch (true) {
+      case Buffer.isBuffer(body):
+      case typeof body === 'string':
+        return rawResponse.end(body);
+      case body instanceof Stream:
+        return body.pipe(rawResponse);
+      default:
+        const stringifiedBody = JSON.stringify(body);
+        if (!headersSent) {
+          ctx.length = Buffer.byteLength(stringifiedBody);
+        }
+        return rawResponse.end(stringifiedBody);
+    }
   }
 
-  public render(response: any, view: string, options: any): any {
-    // TODO
+  public async render(
+    response: Koa.Response,
+    view: string,
+    options: any,
+  ): Promise<void> {
+    const body = await response.ctx.render(view, options);
+
+    this.reply(response, body);
   }
 
   public redirect(response: any, statusCode: number, url: string): any {
@@ -279,8 +337,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
         routeMethodsMap[requestMethod] || routeMethodsMap[RequestMethod.GET]
       ).bind(this.router);
 
-      return routeMethod(path, (ctx: Koa.Context, next: Koa.Next) =>
-        callback(ctx.request, ctx.response, next),
+      return routeMethod(
+        path,
+        (ctx: Koa.ParameterizedContext, next: Koa.Next) =>
+          callback(ctx.request, ctx.response, next),
       );
     };
   }

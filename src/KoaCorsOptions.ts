@@ -78,7 +78,7 @@ export class KoaCorsOptions implements Options {
       return;
     }
 
-    koa.use(async (ctx: Koa.Context, next: Koa.Next) => {
+    koa.use(async (ctx: Koa.ParameterizedContext, next: Koa.Next) => {
       await next();
 
       if (
