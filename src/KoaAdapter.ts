@@ -17,6 +17,7 @@ import { KoaCorsOptions } from './KoaCorsOptions';
 import { Options as ServeStaticOptions } from 'koa-static';
 import { KoaViewsOptions } from './KoaViews';
 import { Stream } from 'stream';
+import { koaReply } from './KoaReply';
 
 type HttpMethods =
   | 'all'
@@ -159,7 +160,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public close() {
-    return new Promise(resolve => this.httpServer.close(resolve));
+    return new Promise((resolve) => this.httpServer.close(resolve));
   }
 
   public getType(): string {
@@ -216,47 +217,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public reply(response: Koa.Response, body: any, statusCode?: number) {
-    response.ctx.respond = false;
-    response.body = body;
-    if (statusCode) {
-      response.status = statusCode;
-    }
-
-    const { writable, status, ctx, res: rawResponse } = response;
-    const { headersSent } = rawResponse;
-
-    if (!writable) {
-      return;
-    }
-
-    // Empty response
-    if ([null, undefined].includes(body)) {
-      body =
-        ctx.req.httpVersionMajor >= 2
-          ? String(status)
-          : ctx.message || String(status);
-
-      if (!headersSent) {
-        ctx.type = 'text';
-        ctx.length = Buffer.byteLength(body);
-      }
-      return rawResponse.end(body);
-    }
-
-    // Other responses
-    switch (true) {
-      case Buffer.isBuffer(body):
-      case typeof body === 'string':
-        return rawResponse.end(body);
-      case body instanceof Stream:
-        return body.pipe(rawResponse);
-      default:
-        const stringifiedBody = JSON.stringify(body);
-        if (!headersSent) {
-          ctx.length = Buffer.byteLength(stringifiedBody);
-        }
-        return rawResponse.end(stringifiedBody);
-    }
+    return koaReply(response, body, statusCode);
   }
 
   public async render(
@@ -272,6 +233,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
   public redirect(response: any, statusCode: number, url: string): any {
     response.status = statusCode;
     response.redirect(url);
+    response.res.end();
   }
 
   public setErrorHandler(

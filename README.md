@@ -71,7 +71,7 @@ npm install @koa/cors
 
 After installation is done you can set CORS same way as in normal NEST application.
 
->  The `enableCors` method accepts options same as normal Nest application. The only difference is in `origin` property which should not be function.
+> The `enableCors` method accepts options same as normal Nest application. The only difference is in `origin` property which should not be function.
 
 ```typescript
 const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
@@ -102,7 +102,7 @@ app.useStaticAssets(path.join(__dirname, 'static'), options);
 await app.init();
 ```
 
->  The `useStaticAssets` method also accepts [options](https://github.com/koajs/static#options) which are exactly same as those from `koa-static`.
+> The `useStaticAssets` method also accepts [options](https://github.com/koajs/static#options) which are exactly same as those from `koa-static`.
 
 #### Views engine
 
@@ -119,11 +119,37 @@ const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
 
 app.setViewEngine({
   viewsDir: path.join(__dirname, 'views'),
-    map: {
-      html: 'lodash',
-    },
+  map: {
+    html: 'lodash',
+  },
 });
 
 await app.init();
 ```
- 
+
+## Caveats
+
+Nest components which operates with with Koa response like exception filters needs to use the `koaReply` utility function from
+this package because the implementation if the reply in adapter doesn't allow to use standard way of setting
+`body` and `status` properties.
+
+Another option is to inject the `HttpAdapterHost` dependency and use reply `reply` method from `httpAdapter` object.
+But this is basically the same as using the `koaReply`.
+
+#### Example
+
+```typescript
+@Catch()
+export class ErrorFilter implements ExceptionFilter {
+  public catch(error: any, host: ArgumentsHost): void {
+    const httpArguments = host.switchToHttp().getResponse();
+
+    // Your exception handling logic
+
+    const reply = {};
+    const statusCode = 500;
+
+    koaReply(httpArguments.getResponse(), reply, statusCode);
+  }
+}
+```

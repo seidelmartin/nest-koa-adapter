@@ -37,7 +37,7 @@ describe(KoaCorsOptions.name, () => {
         .get('/hello/world/sync')
         .set('Origin', 'http://test.domain')
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           assert.strictEqual(
             res.get('access-control-allow-origin'),
             'http://test.domain',
@@ -60,7 +60,7 @@ describe(KoaCorsOptions.name, () => {
           .get('/hello/world/sync')
           .set('Origin', 'http://test.domain')
           .expect(200)
-          .expect(res => {
+          .expect((res) => {
             assert.strictEqual(
               res.get('access-control-allow-origin'),
               'http://test.domain',
@@ -73,7 +73,7 @@ describe(KoaCorsOptions.name, () => {
           .get('/hello/world/sync')
           .set('Origin', 'http://not-allowed.domain')
           .expect(200)
-          .expect(res => {
+          .expect((res) => {
             assert.strictEqual(
               res.get('access-control-allow-origin'),
               undefined,
@@ -94,7 +94,7 @@ describe(KoaCorsOptions.name, () => {
           .set('Access-Control-Request-Method', 'POST')
           .set('Origin', 'http://test.domain')
           .expect(200)
-          .expect(res => {
+          .expect((res) => {
             assert.strictEqual(
               res.get('access-control-allow-origin'),
               'http://test.domain',
@@ -111,7 +111,7 @@ describe(KoaCorsOptions.name, () => {
           .set('Access-Control-Request-Method', 'POST')
           .set('Origin', 'http://test.domain')
           .expect(204)
-          .expect(res => {
+          .expect((res) => {
             assert.strictEqual(
               res.get('access-control-allow-origin'),
               'http://test.domain',

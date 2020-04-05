@@ -36,7 +36,7 @@ describe('Static assets', () => {
     return supertest(app.getHttpServer())
       .get('/image.png')
       .expect(200)
-      .expect(res => {
+      .expect((res) => {
         assert(file.equals(res.body));
       });
   });

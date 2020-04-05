@@ -48,7 +48,7 @@ export class KoaCorsOptions implements Options {
 
       const origins = Array.isArray(origin) ? origin : [origin];
 
-      const matches = origins.some(o => {
+      const matches = origins.some((o) => {
         if (typeof o === 'string') {
           return o === requestOrigin;
         }

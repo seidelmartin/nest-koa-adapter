@@ -59,14 +59,11 @@ describe(KoaAdapter.name, () => {
 
   describe('Host filtering', () => {
     it('/GET host - returns 404 if not set', async () => {
-      return supertest(app.getHttpServer())
-        .get('/host')
-        .expect(404)
-        .expect({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Cannot GET /host',
-        });
+      return supertest(app.getHttpServer()).get('/host').expect(404).expect({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Cannot GET /host',
+      });
     });
 
     it('/GET host - returns data if host set', async () => {
