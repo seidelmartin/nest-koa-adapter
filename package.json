@@ -1,6 +1,6 @@
 {
   "name": "nest-koa-adapter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Koa HTTP adapter for Nest.js",
   "main": "dist/index.js",
   "files": [
