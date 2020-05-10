@@ -45,7 +45,7 @@ class ReplyController {
   }
 }
 
-describe.only('Reply', () => {
+describe('Reply', () => {
   let app: NestKoaApplication;
 
   beforeEach(async () => {
