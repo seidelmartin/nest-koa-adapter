@@ -10,5 +10,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - run: npm ci
       - run: npm run lint
