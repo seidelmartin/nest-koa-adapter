@@ -1,24 +1,35 @@
 import Koa from 'koa';
 import { Stream } from 'stream';
+import { OutgoingHttpHeaders, ServerResponse } from 'http';
 
 interface ResponseOverwrites {
   status: number;
   headers: [string, string][];
 }
 
-function getOverwrites(response: Koa.Response): ResponseOverwrites {
+function getOverwrites(
+  response: Koa.Response,
+  statusCode?: number,
+): ResponseOverwrites {
   return {
     status: response.status,
     headers: Object.entries(response.headers) as [string, string][],
   };
 }
 
-function applyOverwrites(ctx: Koa.Context, overwrites: ResponseOverwrites) {
-  ctx.status = overwrites.status;
+function applyOverwrites(
+  response: ServerResponse,
+  overwrites: ResponseOverwrites,
+) {
+  const headers = overwrites.headers.reduce<OutgoingHttpHeaders>(
+    (headers, [header, value]) => {
+      headers[header] = value;
+      return headers;
+    },
+    {},
+  );
 
-  overwrites.headers.forEach(([header, value]) => {
-    ctx.set(header, value);
-  });
+  response.writeHead(response.statusCode, headers);
 }
 
 export const koaReply = (
@@ -26,15 +37,13 @@ export const koaReply = (
   body: any,
   statusCode?: number,
 ) => {
+  const overwrites = getOverwrites(response, statusCode);
+
   response.ctx.respond = false;
-  response.body = body;
+  response.status = statusCode || overwrites.status;
 
-  if (statusCode) {
-    response.status = statusCode;
-  }
-
-  const overwrites = getOverwrites(response);
   const { writable, status, ctx, res: rawResponse } = response;
+
   const { headersSent } = rawResponse;
 
   if (!writable) {
@@ -43,6 +52,8 @@ export const koaReply = (
 
   // Empty response
   if ([null, undefined].includes(body)) {
+    applyOverwrites(rawResponse, overwrites);
+
     body =
       ctx.req.httpVersionMajor >= 2
         ? String(status)
@@ -53,15 +64,15 @@ export const koaReply = (
       ctx.length = Buffer.byteLength(body);
     }
 
-    applyOverwrites(ctx, overwrites);
     return rawResponse.end(body);
   }
 
+  response.body = body;
+  applyOverwrites(rawResponse, overwrites);
   // Other responses
   switch (true) {
     case Buffer.isBuffer(body):
     case typeof body === 'string':
-      applyOverwrites(ctx, overwrites);
       return rawResponse.end(body);
     case body instanceof Stream:
       return body.pipe(rawResponse);
@@ -70,7 +81,6 @@ export const koaReply = (
       if (!headersSent) {
         ctx.length = Buffer.byteLength(stringifiedBody);
       }
-      applyOverwrites(ctx, overwrites);
       return rawResponse.end(stringifiedBody);
   }
 };
