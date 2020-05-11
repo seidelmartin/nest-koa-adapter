@@ -1,17 +1,16 @@
 import Koa from 'koa';
 import { Stream } from 'stream';
 
-
 interface ResponseOverwrites {
   status: number;
-  headers: [string, string][]
+  headers: [string, string][];
 }
 
 function getOverwrites(response: Koa.Response): ResponseOverwrites {
   return {
     status: response.status,
-    headers: Object.entries(response.headers) as [string, string][]
-  }
+    headers: Object.entries(response.headers) as [string, string][],
+  };
 }
 
 function applyOverwrites(ctx: Koa.Context, overwrites: ResponseOverwrites) {
@@ -19,7 +18,7 @@ function applyOverwrites(ctx: Koa.Context, overwrites: ResponseOverwrites) {
 
   overwrites.headers.forEach(([header, value]) => {
     ctx.set(header, value);
-  })
+  });
 }
 
 export const koaReply = (
@@ -27,7 +26,6 @@ export const koaReply = (
   body: any,
   statusCode?: number,
 ) => {
-  const overwrites = getOverwrites(response);
   response.ctx.respond = false;
   response.body = body;
 
@@ -35,6 +33,7 @@ export const koaReply = (
     response.status = statusCode;
   }
 
+  const overwrites = getOverwrites(response);
   const { writable, status, ctx, res: rawResponse } = response;
   const { headersSent } = rawResponse;
 
@@ -61,7 +60,7 @@ export const koaReply = (
   // Other responses
   switch (true) {
     case Buffer.isBuffer(body):
-    case typeof body === 'string': 
+    case typeof body === 'string':
       applyOverwrites(ctx, overwrites);
       return rawResponse.end(body);
     case body instanceof Stream:
