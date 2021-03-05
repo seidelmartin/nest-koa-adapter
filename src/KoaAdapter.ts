@@ -262,20 +262,20 @@ export class KoaAdapter extends AbstractHttpAdapter<
     });
   }
 
-  public enableCors(options?: CorsOptions): any {
-    const corsMiddleware = loadPackage('@koa/cors', 'KoaAdapter.enableCors()');
+  public enableCors(options: CorsOptions): void {
+      const corsMiddleware = loadPackage('@koa/cors', 'KoaAdapter.enableCors()');
 
-    KoaCorsOptions.validateNestOptions(options);
+      KoaCorsOptions.validateNestOptions(options);
 
-    const koaCorsOptions = options && new KoaCorsOptions(options);
+      const koaCorsOptions = new KoaCorsOptions(options);
 
-    if (koaCorsOptions) {
-      koaCorsOptions.handleOptionsSuccessStatus(
-        this.getInstance<Koa>(),
-        options,
-      );
-    }
-    this.getInstance<Koa>().use(corsMiddleware(koaCorsOptions));
+      if (koaCorsOptions) {
+        koaCorsOptions.handleOptionsSuccessStatus(
+          this.getInstance<Koa>(),
+          options,
+        );
+      }
+      this.getInstance<Koa>().use(corsMiddleware(koaCorsOptions));
   }
 
   public createMiddlewareFactory(
