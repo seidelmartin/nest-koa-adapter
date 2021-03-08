@@ -41,9 +41,9 @@ class TestModule {
       .apply(ScopedMiddleware)
       .forRoutes(HelloWorldController)
       .apply(convertedMiddleware)
-      .forRoutes({ path: '/dummy/p*st', method: RequestMethod.POST })
+      .forRoutes({ path: '/dummy/p(.*)st', method: RequestMethod.POST })
       .apply(globalMiddleware)
-      .forRoutes('*');
+      .forRoutes('(.*)');
   }
 }
 
