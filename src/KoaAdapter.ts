@@ -162,8 +162,8 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public close(): Promise<void> {
-    return new Promise((resolve, reject) =>
-      this.httpServer.close((err) => (err ? reject(err) : resolve())),
+    return new Promise((resolve) =>
+      this.httpServer.close(() => resolve()),
     );
   }
 
