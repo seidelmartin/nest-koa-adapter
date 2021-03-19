@@ -28,7 +28,7 @@ describe(KoaCorsOptions.name, () => {
 
   describe('without options', () => {
     beforeEach(async () => {
-      app.enableCors();
+      app.enableCors({});
       await app.init();
     });
 
@@ -103,7 +103,7 @@ describe(KoaCorsOptions.name, () => {
       });
 
       it('should return OPTIONS response with default 204 status', async () => {
-        app.enableCors();
+        app.enableCors({});
         await app.init();
 
         return supertest(app.getHttpServer())

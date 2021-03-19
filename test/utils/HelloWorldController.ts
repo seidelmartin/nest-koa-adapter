@@ -1,20 +1,22 @@
 import { Controller, Get } from '@nestjs/common';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+
+type HelloWorld = { hello: string };
 
 @Controller('hello')
 export class HelloWorldController {
   @Get('world/sync')
-  helloSync() {
+  helloSync(): HelloWorld {
     return { hello: 'world-sync' };
   }
 
   @Get('world/async')
-  async helloAsync() {
+  async helloAsync(): Promise<HelloWorld> {
     return { hello: 'world-async' };
   }
 
   @Get('world/observable')
-  helloObservable() {
+  helloObservable(): Observable<HelloWorld> {
     return of({ hello: 'world-observable' });
   }
 }

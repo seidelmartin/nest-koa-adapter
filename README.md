@@ -76,7 +76,7 @@ After installation is done you can set CORS same way as in normal NEST applicati
 ```typescript
 const app = NestFactory.create<NestKoaApplication>(AppModule, new KoaAdapter());
 
-app.enableCors();
+app.enableCors({});
 
 await app.init();
 ```

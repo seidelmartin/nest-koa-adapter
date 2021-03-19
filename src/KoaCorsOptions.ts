@@ -13,7 +13,7 @@ export class KoaCorsOptions implements Options {
   readonly maxAge?: number | string;
   readonly origin?: OriginResolver;
 
-  public static validateNestOptions(options: CorsOptions = {}) {
+  public static validateNestOptions(options: CorsOptions = {}): void {
     if (typeof options.origin === 'function') {
       throw new Error(
         `KoaNestAdapter doesn't support CustomOrigin type as origin option.`,
@@ -71,7 +71,7 @@ export class KoaCorsOptions implements Options {
   public handleOptionsSuccessStatus(
     koa: Koa | KoaRouter,
     nestOptions: CorsOptions = {},
-  ) {
+  ): void {
     const { optionsSuccessStatus } = nestOptions;
 
     if (!optionsSuccessStatus) {

@@ -10,13 +10,15 @@ import koaBodyBarser from 'koa-bodyparser';
 import * as http from 'http';
 import * as https from 'https';
 import { RequestHandler } from '@nestjs/common/interfaces';
-import { nestToKoaMiddleware } from './NestKoaMiddleware';
+import {
+  NestKoaFunctionalMiddleware,
+  nestToKoaMiddleware,
+} from './NestKoaMiddleware';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { KoaCorsOptions } from './KoaCorsOptions';
 import { Options as ServeStaticOptions } from 'koa-static';
 import { KoaViewsOptions } from './KoaViews';
-import { Stream } from 'stream';
 import { koaReply } from './KoaReply';
 
 type HttpMethods =
@@ -159,15 +161,17 @@ export class KoaAdapter extends AbstractHttpAdapter<
     return [path as string, handler as KoaHandler];
   }
 
-  public close() {
-    return new Promise((resolve) => this.httpServer.close(resolve));
+  public close(): Promise<void> {
+    return new Promise((resolve) =>
+      this.httpServer.close(() => resolve()),
+    );
   }
 
   public getType(): string {
     return 'koa';
   }
 
-  public initHttpServer(options: NestApplicationOptions) {
+  public initHttpServer(options: NestApplicationOptions): void {
     if (options?.httpsOptions) {
       this.httpServer = https.createServer(
         options.httpsOptions,
@@ -200,22 +204,23 @@ export class KoaAdapter extends AbstractHttpAdapter<
     );
   }
 
-  public getRequestHostname(request: any) {
+  public getRequestHostname(request: Koa.Request): string {
     return request.hostname;
   }
 
-  public getRequestMethod(request: any): string {
+  public getRequestMethod(request: Koa.Request): string {
     return request.method;
   }
 
-  public getRequestUrl(request: any): string {
+  public getRequestUrl(request: Koa.Request): string {
     return request.url;
   }
 
-  public status(response: any, statusCode: number): any {
+  public status(response: Koa.Response, statusCode: number): any {
     response.status = statusCode;
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public reply(response: Koa.Response, body: any, statusCode?: number) {
     return koaReply(response, body, statusCode);
   }
@@ -223,6 +228,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
   public async render(
     response: Koa.Response,
     view: string,
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     options: any,
   ): Promise<void> {
     const body = await response.ctx.render(view, options);
@@ -230,7 +236,11 @@ export class KoaAdapter extends AbstractHttpAdapter<
     this.reply(response, body);
   }
 
-  public redirect(response: any, statusCode: number, url: string): any {
+  public redirect(
+    response: Koa.Response,
+    statusCode: number,
+    url: string,
+  ): any {
     response.status = statusCode;
     response.redirect(url);
     response.res.end();
@@ -250,7 +260,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
     this.getInstance<Koa>().use(nestToKoaMiddleware(handler));
   }
 
-  public setHeader(response: any, name: string, value: string): any {
+  public setHeader(response: Koa.Response, name: string, value: string): any {
     response.set(name, value);
   }
 
@@ -262,12 +272,12 @@ export class KoaAdapter extends AbstractHttpAdapter<
     });
   }
 
-  public enableCors(options?: CorsOptions): any {
+  public enableCors(options: CorsOptions): void {
     const corsMiddleware = loadPackage('@koa/cors', 'KoaAdapter.enableCors()');
 
     KoaCorsOptions.validateNestOptions(options);
 
-    const koaCorsOptions = options && new KoaCorsOptions(options);
+    const koaCorsOptions = new KoaCorsOptions(options);
 
     if (koaCorsOptions) {
       koaCorsOptions.handleOptionsSuccessStatus(
@@ -280,8 +290,10 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
   public createMiddlewareFactory(
     requestMethod: RequestMethod,
-  ): (path: string, callback: Function) => any {
-    return (path: string, callback: Function) => {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+  ): (path: string, middleware: Function) => any {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    return (path: string, middleware: Function) => {
       const router = this.getRouter();
 
       const routeMethodsMap: Record<RequestMethod, KoaRouteMethods> = {
@@ -302,7 +314,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
       return routeMethod(
         path,
         (ctx: Koa.ParameterizedContext, next: Koa.Next) =>
-          callback(ctx.request, ctx.response, next),
+          middleware(ctx.request, ctx.response, next),
       );
     };
   }
