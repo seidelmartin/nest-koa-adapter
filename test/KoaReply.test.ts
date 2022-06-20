@@ -13,7 +13,7 @@ import { Stream, Readable } from 'stream';
 const TestDecorator = (): MethodDecorator => {
   return applyDecorators(
     Header('Content-Type', 'my-content-type'),
-    Header('Content-Length', '123'),
+    Header('Content-Length', '3'),
     HttpCode(280),
   );
 };
@@ -72,7 +72,7 @@ describe('Reply', () => {
         .post(`/reply/${type}`)
         .expect(280)
         .expect('Content-Type', 'my-content-type')
-        .expect('Content-Length', '123');
+        .expect('Content-Length', '3');
     });
   });
 });

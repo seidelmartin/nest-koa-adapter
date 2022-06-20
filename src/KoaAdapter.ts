@@ -162,9 +162,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public close(): Promise<void> {
-    return new Promise((resolve) =>
-      this.httpServer.close(() => resolve()),
-    );
+    return new Promise((resolve) => this.httpServer.close(() => resolve()));
   }
 
   public getType(): string {
@@ -241,9 +239,9 @@ export class KoaAdapter extends AbstractHttpAdapter<
     statusCode: number,
     url: string,
   ): any {
-    response.status = statusCode;
-    response.redirect(url);
-    response.res.end();
+    response.set('Location', url);
+
+    return koaReply(response, null, statusCode);
   }
 
   public setErrorHandler(
