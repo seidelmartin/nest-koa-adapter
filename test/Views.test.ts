@@ -43,9 +43,11 @@ describe('Views', () => {
   });
 
   it('should return rendered template', async () => {
-    await supertest(app.getHttpServer()).get('/views').expect(
-      200,
-      `<!DOCTYPE html>
+    await supertest(app.getHttpServer())
+      .get('/views')
+      .expect(
+        200,
+        `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -55,13 +57,15 @@ describe('Views', () => {
 Hello world
 </body>
 </html>`,
-    );
+      );
   });
 
   it('should return rendered template with variables', async () => {
-    await supertest(app.getHttpServer()).get('/views/greeting').expect(
-      200,
-      `<!DOCTYPE html>
+    await supertest(app.getHttpServer())
+      .get('/views/greeting')
+      .expect(
+        200,
+        `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -71,6 +75,6 @@ Hello world
 Hello Martin
 </body>
 </html>`,
-    );
+      );
   });
 });
