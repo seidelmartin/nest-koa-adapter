@@ -68,8 +68,12 @@ describe('Reply', () => {
 
   ['empty', 'string', 'stream', 'number'].forEach((type) => {
     it(`should use HTTP status code and headers given in decorator for ${type} body`, async () => {
-      await supertest(app.getHttpServer())
+      const reply = await supertest(app.getHttpServer())
         .post(`/reply/${type}`)
+        .buffer(true)
+        .parse((res, callback) => {
+          callback(null, res.text);
+        })
         .expect(280)
         .expect('Content-Type', 'my-content-type')
         .expect('Content-Length', '3');
