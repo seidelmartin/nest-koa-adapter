@@ -129,7 +129,7 @@ await app.init();
 
 ## Caveats
 
-Nest components which operates with with Koa response like exception filters needs to use the `koaReply` utility function from
+Nest components which operates with Koa response like exception filters needs to use the `koaReply` utility function from
 this package because the implementation if the reply in adapter doesn't allow to use standard way of setting
 `body` and `status` properties.
 

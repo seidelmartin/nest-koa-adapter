@@ -3,13 +3,14 @@ import {
   NestApplicationOptions,
   NestMiddleware,
   RequestMethod,
+  VersioningOptions,
 } from '@nestjs/common';
 import Koa from 'koa';
 import KoaRouter from 'koa-router';
 import koaBodyBarser from 'koa-bodyparser';
 import * as http from 'http';
 import * as https from 'https';
-import { RequestHandler } from '@nestjs/common/interfaces';
+import { RequestHandler, VersionValue } from '@nestjs/common/interfaces';
 import {
   NestKoaFunctionalMiddleware,
   nestToKoaMiddleware,
