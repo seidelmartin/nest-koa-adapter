@@ -317,4 +317,16 @@ export class KoaAdapter extends AbstractHttpAdapter<
       );
     };
   }
+
+  public applyVersionFilter(handler: (...args: any[]) => any, version: VersionValue, versioningOptions: VersioningOptions): (req: Koa.Request, res: Koa.Response, next: () => void) => (...args: any[]) => any {
+    throw new Error('Versioning not yet supported in Koa');
+  }
+
+  public end(response: Koa.Response, message: string | undefined): any {
+    response.res.end(message);
+  }
+
+  public isHeadersSent(response: Koa.Response): any {
+    return response.headerSent
+  }
 }
