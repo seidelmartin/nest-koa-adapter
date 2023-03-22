@@ -11,9 +11,15 @@ function getOverwrites(
   response: Koa.Response,
   statusCode?: number,
 ): ResponseOverwrites {
+  if (response) {
+    return {
+      status: response.status,
+      headers: Object.entries(response.headers) as [string, string][],
+    }
+  };
   return {
-    status: response.status,
-    headers: Object.entries(response.headers) as [string, string][],
+    status: statusCode || 200,
+    headers: [],
   };
 }
 
@@ -38,6 +44,10 @@ export const koaReply = (
   body: any,
   statusCode?: number,
 ): void => {
+  if (!response) {
+    return;
+  }
+
   const overwrites = getOverwrites(response, statusCode);
 
   response.ctx.respond = false;
