@@ -327,6 +327,6 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public isHeadersSent(response: Koa.Response): any {
-    return response.headerSent
+    return response?.headerSent
   }
 }
