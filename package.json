@@ -1,6 +1,6 @@
 {
   "name": "nest-koa-adapter",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Koa HTTP adapter for Nest.js",
   "main": "dist/index.js",
   "files": [
@@ -35,21 +35,21 @@
     "@nestjs/core": "^9"
   },
   "optionalDependencies": {
-    "@koa/cors": "4.0.0",
+    "@koa/cors": "5.0.0",
     "koa-static": "5.0.0",
     "koa-views": "8.0.0"
   },
   "devDependencies": {
-    "@koa/cors": "4.0.0",
+    "@koa/cors": "5.0.0",
     "@nestjs/common": "9.3.9",
     "@nestjs/core": "9.3.9",
     "@nestjs/testing": "9.3.9",
     "@types/koa": "2.13.5",
+    "@types/koa__cors": "3.3.1",
     "@types/koa-bodyparser": "4.3.10",
     "@types/koa-router": "7.4.4",
     "@types/koa-static": "4.0.2",
     "@types/koa-views": "2.0.4",
-    "@types/koa__cors": "3.3.1",
     "@types/mocha": "10.0.1",
     "@types/supertest": "2.0.12",
     "@typescript-eslint/eslint-plugin": "5.53.0",
