@@ -40,7 +40,7 @@ describe(KoaCorsOptions.name, () => {
         .expect((res) => {
           assert.strictEqual(
             res.get('access-control-allow-origin'),
-            'http://test.domain',
+            '*',
           );
         });
     });
@@ -97,7 +97,7 @@ describe(KoaCorsOptions.name, () => {
           .expect((res) => {
             assert.strictEqual(
               res.get('access-control-allow-origin'),
-              'http://test.domain',
+              '*',
             );
           });
       });
@@ -114,7 +114,7 @@ describe(KoaCorsOptions.name, () => {
           .expect((res) => {
             assert.strictEqual(
               res.get('access-control-allow-origin'),
-              'http://test.domain',
+              '*',
             );
           });
       });
