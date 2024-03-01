@@ -11,10 +11,7 @@ import koaBodyBarser from 'koa-bodyparser';
 import * as http from 'http';
 import * as https from 'https';
 import { RequestHandler, VersionValue } from '@nestjs/common/interfaces';
-import {
-  NestKoaFunctionalMiddleware,
-  nestToKoaMiddleware,
-} from './NestKoaMiddleware';
+import { nestToKoaMiddleware } from './NestKoaMiddleware';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { KoaCorsOptions } from './KoaCorsOptions';
@@ -318,7 +315,15 @@ export class KoaAdapter extends AbstractHttpAdapter<
     };
   }
 
-  public applyVersionFilter(handler: (...args: any[]) => any, version: VersionValue, versioningOptions: VersioningOptions): (req: Koa.Request, res: Koa.Response, next: () => void) => (...args: any[]) => any {
+  public applyVersionFilter(
+    handler: (...args: any[]) => any,
+    version: VersionValue,
+    versioningOptions: VersioningOptions,
+  ): (
+    req: Koa.Request,
+    res: Koa.Response,
+    next: () => void,
+  ) => (...args: any[]) => any {
     throw new Error('Versioning not yet supported in Koa');
   }
 
@@ -327,6 +332,6 @@ export class KoaAdapter extends AbstractHttpAdapter<
   }
 
   public isHeadersSent(response: Koa.Response): any {
-    return response.headerSent
+    return response.headerSent;
   }
 }

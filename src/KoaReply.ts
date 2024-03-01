@@ -65,7 +65,9 @@ export const koaReply = (
       ctx.length = Buffer.byteLength(body);
     }
 
-    return rawResponse.end(body);
+    rawResponse.end(body);
+
+    return;
   }
 
   response.body = body;
@@ -74,7 +76,8 @@ export const koaReply = (
   switch (true) {
     case Buffer.isBuffer(body):
     case typeof body === 'string':
-      return rawResponse.end(body);
+      rawResponse.end(body);
+      return;
     case body instanceof Stream:
       return body.pipe(rawResponse);
     default:
@@ -82,6 +85,7 @@ export const koaReply = (
       if (!headersSent) {
         ctx.length = Buffer.byteLength(stringifiedBody);
       }
-      return rawResponse.end(stringifiedBody);
+      rawResponse.end(stringifiedBody);
+      return;
   }
 };
