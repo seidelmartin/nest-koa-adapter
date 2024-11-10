@@ -38,8 +38,12 @@ export class KoaAdapter extends AbstractHttpAdapter<
 > {
   private router?: KoaRouter;
 
-  constructor(instance: Koa = new Koa()) {
+  constructor(instance: Koa = new Koa(), router?: KoaRouter) {
     super(instance);
+
+    if (router) {
+      this.router = router;
+    }
   }
 
   private getRouter(): KoaRouter {
@@ -301,6 +305,9 @@ export class KoaAdapter extends AbstractHttpAdapter<
         [RequestMethod.PATCH]: router.patch,
         [RequestMethod.POST]: router.post,
         [RequestMethod.PUT]: router.put,
+        [RequestMethod.SEARCH]: (...args: any[]) => {
+          throw new Error('SEARCH method not yet supported in koa-router');
+        },
       };
 
       const routeMethod = (
@@ -333,5 +340,13 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
   public isHeadersSent(response: Koa.Response): any {
     return response.headerSent;
+  }
+
+  public appendHeader(response: Koa.Response, name: string, value: string): void {
+    response.append(name, value);
+  }
+
+  public getHeader(response: Koa.Response, name: string): string {
+    return response.get(name);
   }
 }

@@ -131,6 +131,8 @@ await app.init();
 
 [Versioning feature](https://docs.nestjs.com/techniques/versioning#versioning) is not yet supported.
 
+[Search http method](https://github.com/nestjs/nest/pull/10533) is not yet supported by koa-router.
+
 Nest components which operates with Koa response like exception filters needs to use the `koaReply` utility function from
 this package because the implementation if the reply in adapter doesn't allow to use standard way of setting
 `body` and `status` properties.
