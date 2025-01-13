@@ -7,6 +7,12 @@ It consists of `KoaAdapter` which is basically just mapping between Nest server 
 `NestKoaMiddleware` and `NestKoaFunctionalMiddleware` are interfaces for writing middleware for Nest together with Koa.
 `koaToNestMiddleware` is an utility function which can convert your old Koa middleware so it can be used in Nest.
 
+## Installation
+
+```
+npm i nest-koa-adapter
+```
+
 ## How to use
 
 #### Create application

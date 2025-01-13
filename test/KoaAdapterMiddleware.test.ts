@@ -25,11 +25,14 @@ class ScopedMiddleware implements NestKoaMiddleware {
   }
 }
 
-const globalMiddleware: NestKoaFunctionalMiddleware = (req, res, next) =>
-  (res.body = GLOBAL_VALUE);
+const globalMiddleware: NestKoaFunctionalMiddleware = (req, res, next) => {
+  res.body = GLOBAL_VALUE;
+};
 
 const convertedMiddleware: NestKoaFunctionalMiddleware = koaToNestMiddleware(
-  (ctx, next) => (ctx.body = CONVERTED_VALUE),
+  (ctx, next) => {
+    ctx.body = CONVERTED_VALUE;
+  },
 );
 
 @Module({

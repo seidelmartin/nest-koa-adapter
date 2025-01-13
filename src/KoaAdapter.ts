@@ -189,7 +189,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
   public setViewEngine(options: KoaViewsOptions | any): any {
     const viewsMiddleware = loadPackage(
-      'koa-views',
+      '@ladjs/koa-views',
       'KoaAdapter.setViewEngine()',
     );
 
@@ -216,7 +216,6 @@ export class KoaAdapter extends AbstractHttpAdapter<
     response.status = statusCode;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public reply(response: Koa.Response, body: any, statusCode?: number) {
     return koaReply(response, body, statusCode);
   }
@@ -224,7 +223,6 @@ export class KoaAdapter extends AbstractHttpAdapter<
   public async render(
     response: Koa.Response,
     view: string,
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     options: any,
   ): Promise<void> {
     const body = await response.ctx.render(view, options);
@@ -286,9 +284,9 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
   public createMiddlewareFactory(
     requestMethod: RequestMethod,
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   ): (path: string, middleware: Function) => any {
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     return (path: string, middleware: Function) => {
       const router = this.getRouter();
 
@@ -301,6 +299,7 @@ export class KoaAdapter extends AbstractHttpAdapter<
         [RequestMethod.PATCH]: router.patch,
         [RequestMethod.POST]: router.post,
         [RequestMethod.PUT]: router.put,
+        [RequestMethod.SEARCH]: router.all,
       };
 
       const routeMethod = (
@@ -333,5 +332,13 @@ export class KoaAdapter extends AbstractHttpAdapter<
 
   public isHeadersSent(response: Koa.Response): any {
     return response.headerSent;
+  }
+
+  appendHeader(response: Koa.Response, name: string, value: string): any {
+    response.set(name, value);
+  }
+
+  getHeader(response: Koa.Response, name: string): any {
+    return response.get(name);
   }
 }
