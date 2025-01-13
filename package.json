@@ -1,6 +1,6 @@
 {
   "name": "nest-koa-adapter",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Koa HTTP adapter for Nest.js",
   "main": "dist/index.js",
   "files": [
@@ -31,8 +31,8 @@
     "koa-router": "12.0.1"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9",
-    "@nestjs/core": "^9"
+    "@nestjs/common": "^10",
+    "@nestjs/core": "^10"
   },
   "optionalDependencies": {
     "@ladjs/koa-views": "9.0.0",
