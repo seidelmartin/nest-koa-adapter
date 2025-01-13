@@ -79,7 +79,8 @@ export const koaReply = (
       rawResponse.end(body);
       return;
     case body instanceof Stream:
-      return body.pipe(rawResponse);
+      body.pipe(rawResponse);
+      return;
     default:
       const stringifiedBody = JSON.stringify(body);
       if (!headersSent) {
