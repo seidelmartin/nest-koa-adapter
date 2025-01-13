@@ -1,4 +1,4 @@
-import koaViews from 'koa-views';
+import koaViews from '@ladjs/koa-views';
 
 type ViewsOptions = Exclude<Parameters<typeof koaViews>[1], undefined>;
 
