@@ -34,7 +34,6 @@ function applyOverwrites(
 
 export const koaReply = (
   response: Koa.Response,
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any,
   statusCode?: number,
 ): void => {

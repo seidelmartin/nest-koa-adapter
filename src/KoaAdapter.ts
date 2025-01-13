@@ -216,7 +216,6 @@ export class KoaAdapter extends AbstractHttpAdapter<
     response.status = statusCode;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public reply(response: Koa.Response, body: any, statusCode?: number) {
     return koaReply(response, body, statusCode);
   }
@@ -224,7 +223,6 @@ export class KoaAdapter extends AbstractHttpAdapter<
   public async render(
     response: Koa.Response,
     view: string,
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     options: any,
   ): Promise<void> {
     const body = await response.ctx.render(view, options);
